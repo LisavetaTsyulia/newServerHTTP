@@ -19,33 +19,37 @@ public class RequestHandler extends Thread {
     @Override
     public void run() {
         try {
-            if (request.getMethod().equals("GET") || request.getMethod().equals("HEAD")){
+            if (request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
                 File file = new File("./src/files", request.getPath());
                 if (file.exists() && !file.isDirectory()) {
                     SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                     String lastModified = sdf.format(file.lastModified());
-                    response.setNow();
-                    response.setCode(200);
-                    response.setLastModif(lastModified);
-                    response.setContentLength(file.length());
-                    response.setContentType(getFileExtension(file));
-                    response.setStatus("OK");
-                    response.setBody(getBody(file));
+                    response
+                            .setNow()
+                            .setCode(200)
+                            .setLastModif(lastModified)
+                            .setContentType(getFileExtension(file))
+                            .setStatus("OK")
+                            .setBody(getBody(file));
                 } else {
-                    response.setNow();
-                    response.setCode(404);
-                    response.setLastModif("");
-                    response.setContentLength(0);
-                    response.setContentType("");
-                    response.setStatus("FILE NOT FOUND");
+                    response
+                            .setNow()
+                            .setCode(404)
+                            .setStatus("FILE NOT FOUND");
                 }
+            } else if (request.getMethod().equals("POST")) {
+                response
+                        .setNow()
+                        .setCode(200)
+                        .setStatus("OK")
+                        .setBody(request.getBody());
             }
             OutputStream os = socket.getOutputStream();
             os.write(response.toString().getBytes());
             os.flush();
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 socket.close();
             } catch (IOException e) {
@@ -61,13 +65,13 @@ public class RequestHandler extends Thread {
             return "";
         }
     }
-    private String getBody(File file) {
-        String content = "";
+    private char[] getBody(File file) {
+        char[] content = new char[0];
         try (FileInputStream fis = new FileInputStream(file);
                 BufferedInputStream bis = new BufferedInputStream(fis)) {
             byte[] mybytearray = new byte[(int) file.length()];
             bis.read(mybytearray, 0, mybytearray.length);
-            content = new String(mybytearray);
+            content = new String(mybytearray).toCharArray();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

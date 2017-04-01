@@ -4,26 +4,28 @@ import java.util.Date;
 
 public class Response {
 
-    private String HTTPversion = "HTTP/1.1";
+    private String httpVersion = "HTTP/1.1";
     private int code;
     private String status;
     private Date now;
-    private String lastModif;
+    private String lastModif = "";
     private String server = "LisaServer";
-    private String contentType;
+    private String contentType = "";
     private long contentLength;
-    private String body;
+    private char[] body;
 
-    public void setBody(String body) {
+    public Response setBody(char[] body) {
         this.body = body;
+        contentLength = body.length;
+        return this;
     }
 
-    public String getBody() {
+    public char[] getBody() {
         return body;
     }
 
-    public String getHTTPversion() {
-        return HTTPversion;
+    public String getHttpVersion() {
+        return httpVersion;
     }
 
     public int getCode() {
@@ -54,40 +56,38 @@ public class Response {
         return contentLength;
     }
 
-    public void setCode(int code) {
+    public Response setCode(int code) {
         this.code = code;
+        return this;
     }
 
-    public void setStatus(String status) {
+    public Response setStatus(String status) {
         this.status = status;
+        return this;
     }
 
-    public void setNow() {
-        Date date = new Date();
-        this.now = date;
+    public Response setNow() {
+        this.now = new Date();
+        return this;
     }
 
-    public void setLastModif(String lastModif) {
+    public Response setLastModif(String lastModif) {
         this.lastModif = lastModif;
+        return this;
     }
 
-    public void setContentType(String contentType) {
+    public Response setContentType(String contentType) {
         this.contentType = contentType;
-    }
-
-    public void setContentLength(long contentLength) {
-        this.contentLength = contentLength;
+        return this;
     }
 
     public String toString() {
-        String result =  getHTTPversion() + " " + String.valueOf(getCode()) + " " + getStatus() + "\r\n" +
+        return getHttpVersion() + " " + String.valueOf(getCode()) + " " + getStatus() + "\r\n" +
                 "Date: " + String.valueOf(getNow()) + "\r\n" +
                 "Server: " + getServer() + "\r\n" +
                 "Last-Modified: " + getLastModif() + "\r\n" +
                 "Content-Type: " + getContentType() + "\r\n" +
-                "Content-Length: " + String.valueOf(getContentLength()) + "\r\n" +
-                "Connection: close\r\n\r\n" +
-                getBody() + "\r\n";
-        return result;
+                "Content-Length: " + String.valueOf(getContentLength()) + "\r\n\r\n" +
+                new String(getBody()) + "\r\n";
     }
 }

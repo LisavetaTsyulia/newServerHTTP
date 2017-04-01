@@ -35,7 +35,7 @@ public class Request {
         Pattern pattern = Pattern.compile("(.*):\\s(.*)");
         Matcher matcher = pattern.matcher(header);
         if (matcher.matches()) {
-            headersHashMap.put(matcher.group(1), matcher.group(2));
+            headersHashMap.put(matcher.group(1).toLowerCase(), matcher.group(2).toLowerCase());
         }
     }
 
@@ -57,6 +57,10 @@ public class Request {
 
     public String getPath() {
         return path;
+    }
+
+    public char[] getBody() {
+        return body;
     }
 
     @Override

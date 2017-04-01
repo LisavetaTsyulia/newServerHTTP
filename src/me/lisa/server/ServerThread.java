@@ -22,7 +22,6 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
-
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             while (isAlive) {
                 try {
@@ -33,7 +32,7 @@ public class ServerThread extends Thread {
                         while (!(header = br.readLine()).equals("")) {
                             request.addHeader(header);
                         }
-                        System.out.println(request.getMethod());
+                        // TODO remove if
                         if (request.getMethod().equals("POST")) {
                             char[] body = new char[request.getContentLength()];
                             br.read(body, 0, body.length);
