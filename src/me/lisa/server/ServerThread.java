@@ -2,51 +2,52 @@ package me.lisa.server;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 
 public class ServerThread extends Thread {
 
     private Socket socket;
-    private InputStream is;
-    private OutputStream os;
+    private InputStream inputStream;
     private boolean isAlive;
 
     public ServerThread(Socket socket) {
         try {
             this.socket = socket;
-            this.is = socket.getInputStream();
-            this.os = socket.getOutputStream();
+            socket.setSoTimeout(2000);
+            this.inputStream = socket.getInputStream();
+            isAlive = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        isAlive = true;
     }
 
     @Override
     public void run() {
-        try {
-            socket.setSoTimeout(2000);
-        } catch (SocketException e) { }
 
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             while (isAlive) {
                 try {
                     String line = br.readLine();
-                    if (line != null){
+                    if (line != null) {
                         Request request = new Request(line);
                         String header;
-                        while ((header = br.readLine()) != null){
+                        while (!(header = br.readLine()).equals("")) {
                             request.addHeader(header);
                         }
-                        char[] buffer = new char[request.getContentLength()];
-                        br.read(buffer, 0, buffer.length);
-                        request.addBody(buffer);
-                        new Thread(new ServerResponse(socket, request)).start();
+                        System.out.println(request.getMethod());
+                        if (request.getMethod().equals("POST")) {
+                            char[] body = new char[request.getContentLength()];
+                            br.read(body, 0, body.length);
+                            request.setBody(body);
+                        }
+                        System.out.println(request);
+                        new RequestHandler(socket, request).start();
                     }
-                } catch (Exception ex) {
+                } catch (IOException e) {
                     isAlive = false;
                 }
             }
-        } catch (Exception ex) { }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

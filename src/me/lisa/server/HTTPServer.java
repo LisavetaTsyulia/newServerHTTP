@@ -1,70 +1,68 @@
 package me.lisa.server;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.ServerSocket;
 
 public class HTTPServer {
-    private JFrame frm;
-    private JPanel pan;
-    private JTextArea textArea;
-    private JButton btnStart;
-    private JButton btnStop;
-    private ServerSocket serverSocket;
-    private ServerListener currentServerListener;
+
+    private ServerListener serverListener;
 
     public static void main(String[] args) {
-        HTTPServer httpServer = new HTTPServer();
-        httpServer.setGUI();
+        try {
+            HTTPServer httpServer = new HTTPServer();
+            httpServer.setGUI();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public HTTPServer() throws IOException {
+        ServerSocket serverSocket = new ServerSocket(8080);
+        serverSocket.setSoTimeout(100);
+        serverListener = new ServerListener(serverSocket);
+        serverListener.start();
     }
 
     private void setGUI() {
-        frm = new JFrame();
-        pan = new JPanel();
-        textArea = new JTextArea(20, 50);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setEditable(false);
+        JFrame frame = new JFrame();
+        JPanel panel = new JPanel();
+        JTextArea logArea = new JTextArea(20, 50);
+        logArea.setLineWrap(true);
+        logArea.setWrapStyleWord(true);
+        logArea.setEditable(false);
 
-        btnStart = new JButton("Start");
-        btnStop = new JButton("Stop");
-        btnStart.addActionListener(new StartActionListener());
-        btnStop.addActionListener(new StopActionListener());
-
-        JScrollPane scr = new JScrollPane(textArea);
-        scr.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scr.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        pan.add(scr);
-        pan.add(btnStart);
-        pan.add(btnStop);
-
-        frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frm.setContentPane(pan);
-        frm.setBounds(10, 10, 10, 10);
-        frm.setSize(600, 400);
-        frm.setVisible(true);
-    }
-
-    private class StartActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
+        JButton btnStart = new JButton("Start");
+        JButton btnStop = new JButton("Stop");
+        btnStop.setEnabled(false);
+        btnStart.addActionListener(e -> {
             try {
-                serverSocket = new ServerSocket(8080);
+                btnStart.setEnabled(false);
+                btnStop.setEnabled(true);
+                serverListener.runListener();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            ServerListener serverListener = new ServerListener(serverSocket);
-            serverListener.run();
-            currentServerListener = serverListener;
-        }
+        });
+        btnStop.addActionListener(e -> {
+            btnStart.setEnabled(true);
+            btnStop.setEnabled(false);
+            serverListener.pauseListener();
+        });
+
+        JScrollPane scrollPane = new JScrollPane(logArea);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        panel.add(scrollPane);
+        panel.add(btnStart);
+        panel.add(btnStop);
+
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setContentPane(panel);
+        frame.setBounds(10, 10, 10, 10);
+        frame.setSize(600, 400);
+        frame.setVisible(true);
     }
 
-    private class StopActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            currentServerListener.stop();
-        }
-    }
 }
