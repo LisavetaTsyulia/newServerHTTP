@@ -12,7 +12,7 @@ public class Response {
     private String server = "LisaServer";
     private String contentType = "";
     private long contentLength;
-    private char[] body;
+    private char[] body ;
 
     public Response setBody(char[] body) {
         this.body = body;

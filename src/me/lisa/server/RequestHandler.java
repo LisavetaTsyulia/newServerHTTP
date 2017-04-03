@@ -21,6 +21,7 @@ public class RequestHandler extends Thread {
         try {
             if (request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
                 File file = new File("./src/files", request.getPath());
+                File file2 = new File("./src/files", "second.html");
                 if (file.exists() && !file.isDirectory()) {
                     SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                     String lastModified = sdf.format(file.lastModified());
@@ -35,7 +36,8 @@ public class RequestHandler extends Thread {
                     response
                             .setNow()
                             .setCode(404)
-                            .setStatus("FILE NOT FOUND");
+                            .setStatus("FILE NOT FOUND")
+                            .setBody(new char[0]);
                 }
             } else if (request.getMethod().equals("POST")) {
                 response
